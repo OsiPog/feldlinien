@@ -190,8 +190,8 @@ class Pole extends Vec2 {
 	}
 	
 	show() {
-		let c = [0,0,255]
-		if (this.source) c = [255, 0, 0];
+		let c = C_MINUS
+		if (this.source) c = C_PLUS;
 		fill(c);
 		
 		let signPos;
@@ -222,7 +222,7 @@ class Pole extends Vec2 {
 			let D = this.p2.copy();
 			D.subtract(n);
 			
-
+			stroke(C_FIELD_LINE);
 			beginShape();
 			vertex(A.x, A.y);
 			stroke(0);
@@ -238,6 +238,7 @@ class Pole extends Vec2 {
 		let length = 0.5 *this.r;
 		
 		strokeWeight(5);
+		stroke(C_POLE_SIGN);
 		line(signPos.x - length, signPos.y, signPos.x + length, signPos.y);
 		if (this.source) {
 			line(signPos.x, signPos.y - length, signPos.x, signPos.y + length);
@@ -339,6 +340,7 @@ function fieldLine(p, poleList, breakOnOutOfBounds = false) {
 			
 			justGotOutOfBounds = true;
 			
+			stroke(C_FIELD_LINE);
 			line(p.x, p.y, p2.x, p2.y);
 			
 			if ((i % ARROW_DENSITY == 0) && (!last) && (i != 0)) {
@@ -351,6 +353,7 @@ function fieldLine(p, poleList, breakOnOutOfBounds = false) {
 				a1.scale(-0.5*ARROW_LENGTH*direction)
 				a2.scale(-0.5*ARROW_LENGTH*direction)
 				
+				stroke(C_FIELD_LINE);
 				line(p2.x, p2.y, p2.x + a1.x, p2.y + a1.y);
 				line(p2.x, p2.y, p2.x + a2.x, p2.y + a2.y);
 			}
@@ -382,6 +385,13 @@ let zeroVec = new Vec2();
 
 let densitySlider;
 let accuracySlider;
+
+// colours
+let C_FIELD_LINE = [0,0,0];
+let C_MINUS = [0,0,255];
+let C_PLUS = [255,0,0];
+let C_POLE_SIGN = [0,0,0];
+let C_SNAP_LINE = [200,0,255];
 
 let TRANSLATION;
 
@@ -585,24 +595,21 @@ function touchEnded() {
 function mouseDragged() {
 	if (mouseDrag) {
 		draggedPole.become(mouse);
-		keyPressed(); // to update the position if shift is pressed
+		
+		//Snapping
+		if (keyIsDown(SHIFT)) {
+			for (let pole of allPoles) {
+				if (pole.isEqual(draggedPole)) continue;
+				if (Math.abs(pole.x - draggedPole.x) <= SNAP_RANGE) {
+					draggedPole.x = pole.x;
+				}
+				else if (Math.abs(pole.y - draggedPole.y) <= SNAP_RANGE) {
+					draggedPole.y = pole.y;
+				}
+			}
+		}
 	}
 }
 function touchMoved() {
 	mouseDragged();
-}
-
-// Snapping when dragging a pole and pressed shift
-function keyPressed() {
-	if ((keyCode == SHIFT) && mouseDrag) {
-		for (let pole of allPoles) {
-			if (pole.isEqual(draggedPole)) continue;
-			if (Math.abs(pole.x - draggedPole.x) <= SNAP_RANGE) {
-				draggedPole.x = pole.x;
-			}
-			else if (Math.abs(pole.y - draggedPole.y) <= SNAP_RANGE) {
-				draggedPole.y = pole.y;
-			}
-		}
-	}
 }
