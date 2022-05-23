@@ -395,6 +395,8 @@ let MAX_ITERATIONS = 500;
 
 let STROKE_WEIGHT = 1;
 
+let SNAP_RANGE = 10;
+
 let sendSort = true;
 function setup() {
 	createCanvas(1280, 720);
@@ -583,8 +585,24 @@ function touchEnded() {
 function mouseDragged() {
 	if (mouseDrag) {
 		draggedPole.become(mouse);
+		keyPressed(); // to update the position if shift is pressed
 	}
 }
 function touchMoved() {
 	mouseDragged();
+}
+
+// Snapping when dragging a pole and pressed shift
+function keyPressed() {
+	if ((keyCode == SHIFT) && mouseDrag) {
+		for (let pole of allPoles) {
+			if (pole.isEqual(draggedPole)) continue;
+			if (Math.abs(pole.x - draggedPole.x) <= SNAP_RANGE) {
+				draggedPole.x = pole.x;
+			}
+			else if (Math.abs(pole.y - draggedPole.y) <= SNAP_RANGE) {
+				draggedPole.y = pole.y;
+			}
+		}
+	}
 }
